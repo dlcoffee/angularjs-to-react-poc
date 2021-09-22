@@ -1,0 +1,19 @@
+<!doctype html>
+<html ng-app="angularApp">
+
+<body>
+  <!-- <ui-view></ui-view> -->
+  <div ui-view="heading"></div>
+
+  <main class="container main-container">
+    <div class="main-content" ui-view="main-content"></div>
+  </main>
+
+
+  <script src="angular/angular.js"></script>
+  <script src="angular-ui-router/angular-ui-router.js"></script>
+  <script src="app.js"></script>
+  <script src="home.js"></script>
+</body>
+
+</html>
