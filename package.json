@@ -1,5 +1,5 @@
 {
-  "name": "angular-to-react-poc",
+  "name": "angularjs-to-react-poc",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dlcoffee/angular-to-react-poc.git"
+    "url": "git+https://github.com/dlcoffee/angularjs-to-react-poc.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dlcoffee/angular-to-react-poc/issues"
+    "url": "https://github.com/dlcoffee/angularjs-to-react-poc/issues"
   },
-  "homepage": "https://github.com/dlcoffee/angular-to-react-poc#readme",
+  "homepage": "https://github.com/dlcoffee/angularjs-to-react-poc#readme",
   "dependencies": {
     "@uirouter/angularjs": "^1.0.29",
     "angular": "^1.8.2",
