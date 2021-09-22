@@ -1,8 +1,10 @@
 const angularControllers = angular.module('angularControllers', [])
 const angularComponents = angular.module('angularComponents', [])
+const angularServices = angular.module('angularServices', [])
 
 const angularApp = angular.module('angularApp', [
   'ui.router',
+  'angularServices',
   'angularControllers',
   'angularComponents',
 ])

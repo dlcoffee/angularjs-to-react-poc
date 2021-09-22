@@ -3,14 +3,24 @@ angularComponents.component('headingComponent', {
     <nav style='border: 2px solid blue; padding: 2px;'>
       <div class="nav-wrapper">
         <h4>Todos App</h2>
+        <span>{{todoCount()}} to be completed</span>
       </div>
     </nav
   `,
   controller: [
     '$scope',
-    function ($scope) {
+    'todoStorage',
+    function ($scope, todoStorage) {
       console.log('testing testing')
-      $scope.text = 'angular input'
+
+      $scope.todoCount = () => {
+        return todoStorage.todos.filter((todo) => !todo.completed).length
+      }
+
+      // $scope.$on('todoAdded', (event, args) => {
+      //   console.log(args)
+      //   $scope.todoCount++
+      // })
     },
   ],
 })
@@ -34,16 +44,24 @@ angularComponents.component('mainComponent', {
     </main>
   `,
   controller: [
+    '$rootScope',
     '$scope',
-    function ($scope) {
-      $scope.todos = [
-        {
-          title: 'learn angular',
-        },
-        {
-          title: 'get coffee',
-        },
-      ]
+    'todoStorage',
+    function ($rootScope, $scope, todoStorage) {
+      this.$onInit = function () {
+        console.log($scope.todos)
+      }
+
+      $scope.todos = todoStorage.todos
+      // $scope.todos = [
+      //   {
+      //     title: 'learn angular',
+      //   },
+      //   {
+      //     title: 'get coffee',
+      //   },
+      // ]
+
       $scope.newTodo = ''
 
       $scope.addTodo = () => {
@@ -53,6 +71,8 @@ angularComponents.component('mainComponent', {
         }
 
         $scope.todos.push(todo)
+
+        // $rootScope.$broadcast('todoAdded', { data: todo })
         $scope.newTodo = ''
       }
 
