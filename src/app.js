@@ -9,12 +9,13 @@ const angularApp = angular.module('angularApp', [
 
 angularApp
   .config([
+    '$locationProvider',
     '$stateProvider',
     '$urlRouterProvider',
-    function ($stateProvider, $urlRouterProvider) {
+    function ($locationProvider, $stateProvider, $urlRouterProvider) {
       const home = {
         name: 'home',
-        url: '/home',
+        url: '/',
         views: {
           heading: 'headingComponent',
           'main-content': 'mainComponent',
@@ -23,7 +24,9 @@ angularApp
 
       $stateProvider.state(home)
 
-      $urlRouterProvider.otherwise('/home')
+      $urlRouterProvider.otherwise('/')
+
+      $locationProvider.html5Mode({ enabled: true, requireBase: false })
     },
   ])
   .run([
