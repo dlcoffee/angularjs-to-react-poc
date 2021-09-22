@@ -9,10 +9,6 @@ app.use(
   express.static(__dirname + '/node_modules/@uirouter/angularjs/release/')
 )
 
-// app.get('/', (req, res) => {
-//   res.render('src/index')
-// })
-
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })

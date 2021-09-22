@@ -1,7 +1,14 @@
 angularServices.service('todoStorage', [
   function () {
     return {
-      todos: [],
+      todos: [
+        {
+          title: 'learn angular',
+        },
+        {
+          title: 'get coffee',
+        },
+      ],
     }
   },
 ])
