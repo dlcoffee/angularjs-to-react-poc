@@ -20,18 +20,41 @@ angularComponents.component('headingComponent', {
 
 angularComponents.component('mainComponent', {
   template: `
-    <main style='margin: 16px auto; max-width: 400px;'>
-      <form ng-submit="addTodo()">
+    <main style='margin: 16px auto;'>
+      <form ng-submit="addTodo()" style='margin: 0 auto; max-width: 400px;'>
         <input placeholder="Add Todo" ng-model="newTodo" autofocus style='width: 100%;'>
       </form>
 
-      <ul class="todo-list">
-        <h4>(1) angular</h4>
-        <ng-list-item ng-repeat="todo in todos" index="$index" todo="todo" on-remove="removeTodo" on-edit="handleEdit(editedTodo, index)" on-check="handleCheck(todo, index)"></ng-list-item>
 
-        <h4>(2) angular</h4>
-        <ng-list-item ng-repeat="todo in todos" index="$index" todo="todo" on-remove="removeTodo" on-edit="handleEdit(editedTodo, index)" on-check="handleCheck(todo, index)"></ng-list-item>
-      </ul>
+      <div style='display: flex; justify-content: center;'>
+        <div>
+          <ul class="todo-list">
+            <h4>(1) angular</h4>
+            <ng-list-item
+              ng-repeat="todo in todos"
+              index="$index"
+              todo="todo"
+              on-remove="removeTodo"
+              on-edit="handleEdit(editedTodo, index)"
+              on-check="handleCheck(todo, index)">
+            </ng-list-item>
+          </ul>
+        </div>
+
+        <div>
+          <ul class="todo-list">
+            <h4>(2) angular</h4>
+            <ng-list-item
+              ng-repeat="todo in todos"
+              index="$index"
+              todo="todo"
+              on-remove="removeTodo"
+              on-edit="handleEdit(editedTodo, index)"
+              on-check="handleCheck(todo, index)">
+            </ng-list-item>
+          </ul>
+        </div>
+      </div>
 
       <pre>{{ todos | json }}</pre>
 
