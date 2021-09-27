@@ -29,8 +29,14 @@ angularComponents.component('mainComponent', {
         <li ng-repeat="todo in todos">
           <div class="view">
             <input type="checkbox" ng-model="todo.completed">
+            <button ng-click="setEditing(todo)" ng-disabled="todo === editingTodo">Edit</button>
             <button ng-click="removeTodo(todo)">&times;</button>
-            <label>{{todo.title}}</label>
+
+            <label ng-if="todo !== editingTodo">{{todo.title}}</label>
+
+            <form ng-if="todo === editingTodo" style='display: inline;' ng-submit="finishEditing()">
+              <input type="text" ng-model="todo.title" ng-blur="finishEditing()"></input>
+            </form>
           </div>
         </li>
       </ul>
@@ -46,6 +52,7 @@ angularComponents.component('mainComponent', {
 
       $scope.todos = todoStorage.todos
       $scope.newTodo = ''
+      $scope.editingTodo = null
 
       $scope.addTodo = () => {
         const todo = {
@@ -56,6 +63,14 @@ angularComponents.component('mainComponent', {
         $scope.todos.push(todo)
 
         $scope.newTodo = ''
+      }
+
+      $scope.setEditing = (todo) => {
+        $scope.editingTodo = todo
+      }
+
+      $scope.finishEditing = () => {
+        $scope.editingTodo = null
       }
 
       $scope.removeTodo = (todo) => {
