@@ -29,6 +29,34 @@ angularComponents.component('mainComponent', {
       <div style='display: flex; justify-content: center;'>
         <div>
           <ul class="todo-list">
+            <h4>(1) react</h4>
+            <list-item
+              ng-repeat="todo in todos"
+              index="$index"
+              todo="todo"
+              on-remove="removeTodo"
+              on-edit="handleEdit"
+              on-check="handleCheck">
+            </list-item>
+          </ul>
+        </div>
+
+        <div>
+          <ul class="todo-list">
+            <h4>(2) react</h4>
+            <list-item
+              ng-repeat="todo in todos"
+              index="$index"
+              todo="todo"
+              on-remove="removeTodo"
+              on-edit="handleEdit"
+              on-check="handleCheck">
+            </list-item>
+          </ul>
+        </div>
+
+        <div>
+          <ul class="todo-list">
             <h4>(1) angular</h4>
             <ng-list-item
               ng-repeat="todo in todos"
@@ -140,10 +168,6 @@ angularComponents.component('ngListItem', {
     function () {
       const ctrl = this
 
-      // ctrl.$onInit = () => {
-      //   ctrl.checkboxModel = ctrl.todo.completed
-      // }
-
       ctrl.editingTodo = null
 
       ctrl.handleEditing = () => {
@@ -158,6 +182,110 @@ angularComponents.component('ngListItem', {
         ctrl.onEdit({ index: ctrl.index, editedTodo: ctrl.editingTodo })
         ctrl.editingTodo = null
       }
+    },
+  ],
+})
+
+class ListItem extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      editingTodo: null,
+    }
+  }
+
+  render() {
+    const { index, todo, onCheck, onRemove, onEdit } = this.props
+    const { editingTodo } = this.state
+
+    const handleSubmit = (e) => {
+      e.preventDefault()
+
+      onEdit(editingTodo, index)
+      this.setState({ editingTodo: null })
+    }
+
+    const setEdit = () => {
+      this.setState({ editingTodo: todo })
+    }
+
+    const handleEditing = (e) => {
+      this.setState({ editingTodo: { ...editingTodo, title: e.target.value } })
+    }
+
+    return (
+      <li>
+        <div className="view">
+          <input
+            type="checkbox"
+            checked={Boolean(todo.completed)}
+            onChange={() => onCheck(todo, index)}
+          ></input>
+          <button disabled={Boolean(editingTodo)} onClick={setEdit}>
+            Edit
+          </button>
+          <button onClick={() => onRemove(todo, index)}>&times;</button>
+
+          {editingTodo ? (
+            <form style={{ display: 'inline' }} onSubmit={handleSubmit}>
+              <input
+                type="text"
+                value={editingTodo.title}
+                onChange={handleEditing}
+                onBlur={handleSubmit}
+              ></input>
+            </form>
+          ) : (
+            <label>{todo.title}</label>
+          )}
+        </div>
+      </li>
+    )
+  }
+}
+
+angularComponents.component('listItem', {
+  bindings: {
+    index: '<',
+    todo: '<',
+    onCheck: '<',
+    onEdit: '<',
+    onRemove: '<',
+  },
+  controller: [
+    '$element',
+    function ($element) {
+      const ctrl = this
+
+      ctrl.$scope = window.angular.element($element).scope()
+
+      // callbacks need to be wrapped in an $apply()
+      // in order for the parent to update visually
+      const wrap = function (fn) {
+        return function () {
+          const fnArgs = arguments
+
+          ctrl.$scope.$apply(function () {
+            return fn.apply(null, fnArgs)
+          })
+        }
+      }
+
+      ctrl.$onChanges = () => {
+        ReactDOM.render(
+          React.createElement(ListItem, {
+            index: ctrl.index,
+            todo: ctrl.todo,
+            onCheck: wrap(ctrl.onCheck),
+            onEdit: wrap(ctrl.onEdit),
+            onRemove: wrap(ctrl.onRemove),
+          }),
+          $element[0]
+        )
+      }
+
+      ctrl.$onDestroy = () => ReactDOM.unmountComponentAtNode($element[0])
     },
   ],
 })
