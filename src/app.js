@@ -1,17 +1,21 @@
 import angular from "angular";
 import "@uirouter/angularjs";
+import ngRedux from "ng-redux";
 
 import "./components";
 import "./todo-storage";
 
-const angularApp = angular.module("angularApp", ["ui.router", "angularServices", "angularComponents"]);
+import store from "./redux/store";
+
+const angularApp = angular.module("angularApp", ["ui.router", "angularServices", "angularComponents", ngRedux]);
 
 angularApp
   .config([
     "$locationProvider",
     "$stateProvider",
     "$urlRouterProvider",
-    function ($locationProvider, $stateProvider, $urlRouterProvider) {
+    "$ngReduxProvider",
+    function ($locationProvider, $stateProvider, $urlRouterProvider, $ngReduxProvider) {
       const home = {
         name: "home",
         url: "/",
@@ -26,6 +30,8 @@ angularApp
       $urlRouterProvider.otherwise("/");
 
       $locationProvider.html5Mode({ enabled: true, requireBase: false });
+
+      $ngReduxProvider.provideStore(store);
     },
   ])
   .run([

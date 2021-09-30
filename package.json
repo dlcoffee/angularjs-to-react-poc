@@ -19,13 +19,17 @@
   },
   "homepage": "https://github.com/dlcoffee/angularjs-to-react-poc#readme",
   "dependencies": {
+    "@reduxjs/toolkit": "^1.6.1",
     "@uirouter/angularjs": "^1.0.29",
     "angular": "^1.8.2",
     "babel-cli": "^6.26.0",
     "babel-preset-react-app": "^3.1.2",
     "express": "^4.17.1",
+    "ng-redux": "^4.4.3",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.5",
+    "redux": "^4.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",

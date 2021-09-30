@@ -1,6 +1,10 @@
 import angular from "angular";
 import React from "react";
 import ReactDOM from "react-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+import { addTodo, removeTodo, toggleTodo } from "./redux/slices/todoSlice";
 
 const angularComponents = angular.module("angularComponents", []);
 
@@ -27,23 +31,19 @@ angularComponents.component("headingComponent", {
 angularComponents.component("mainComponent", {
   template: `
     <main style='margin: 16px auto;'>
+      <form ng-submit="addReduxTodo()" style='margin: 0 auto; max-width: 400px;'>
+        <input placeholder="Add Redux Todo" ng-model="newReduxTodo" autofocus style='width: 100%;'>
+      </form>
+
       <form ng-submit="addTodo()" style='margin: 0 auto; max-width: 400px;'>
         <input placeholder="Add Todo" ng-model="newTodo" autofocus style='width: 100%;'>
       </form>
 
-
       <div style='display: flex; justify-content: center;'>
         <div>
           <ul class="todo-list">
-            <h4>(1) react</h4>
-            <list-item
-              ng-repeat="todo in todos"
-              index="$index"
-              todo="todo"
-              on-remove="removeTodo"
-              on-edit="handleEdit"
-              on-check="handleCheck">
-            </list-item>
+            <h4>(1) react with redux</h4>
+            <list-items />
           </ul>
         </div>
 
@@ -63,14 +63,14 @@ angularComponents.component("mainComponent", {
 
         <div>
           <ul class="todo-list">
-            <h4>(1) angular</h4>
+            <h4>(1) angular redux</h4>
             <ng-list-item
-              ng-repeat="todo in todos"
+              ng-repeat="todo in reduxTodo.todos"
               index="$index"
               todo="todo"
               on-remove="removeTodo"
               on-edit="handleEdit(editedTodo, index)"
-              on-check="handleCheck(todo, index)">
+              on-check="reduxTodo.toggleTodo(index)">
             </ng-list-item>
           </ul>
         </div>
@@ -90,19 +90,33 @@ angularComponents.component("mainComponent", {
         </div>
       </div>
 
+      <p>Redux State</p>
+      <pre>{{ reduxTodo.todos | json }}</pre>
+
+      <p>Angular State</p>
       <pre>{{ todos | json }}</pre>
+
 
     </main>
   `,
+  controllerAs: "reduxTodo",
   controller: [
     "$scope",
     "todoStorage",
-    function ($scope, todoStorage) {
+    "$ngRedux",
+    function ($scope, todoStorage, $ngRedux) {
       this.$onInit = function () {
         // console.log($scope.todos)
+        const unsubscribe = $ngRedux.connect((state) => ({ todos: state.todo.todos }), {
+          addTodo,
+          removeTodo,
+          toggleTodo,
+        })(this);
+        $scope.$on("$destroy", unsubscribe);
       };
 
       $scope.todos = todoStorage.todos;
+
       $scope.newTodo = "";
 
       $scope.addTodo = () => {
@@ -115,6 +129,11 @@ angularComponents.component("mainComponent", {
         $scope.todos = todoStorage.todos;
 
         $scope.newTodo = "";
+      };
+
+      $scope.addReduxTodo = () => {
+        $ngRedux.dispatch(addTodo($scope.newReduxTodo));
+        $scope.newReduxTodo = "";
       };
 
       $scope.removeTodo = (todo, index) => {
@@ -271,13 +290,61 @@ angularComponents.component("listItem", {
 
       ctrl.$onChanges = () => {
         ReactDOM.render(
-          React.createElement(ListItem, {
-            index: ctrl.index,
-            todo: ctrl.todo,
-            onCheck: wrap(ctrl.onCheck),
-            onEdit: wrap(ctrl.onEdit),
-            onRemove: wrap(ctrl.onRemove),
-          }),
+          <Provider store={store}>
+            <ListItem
+              index={ctrl.index}
+              todo={ctrl.todo}
+              onCheck={wrap(ctrl.onCheck)}
+              onEdit={wrap(ctrl.onEdit)}
+              onRemove={wrap(ctrl.onRemove)}
+            />
+          </Provider>,
+          $element[0]
+        );
+      };
+
+      ctrl.$onDestroy = () => ReactDOM.unmountComponentAtNode($element[0]);
+    },
+  ],
+});
+
+const ListItems = () => {
+  const todos = useSelector((state) => state.todo.todos);
+  const dispatch = useDispatch();
+
+  return (
+    <>
+      {todos.map((todo, index) => (
+        <ListItem
+          key={index}
+          index={index}
+          todo={todo}
+          onCheck={() => {
+            dispatch(toggleTodo(index));
+          }}
+          onRemove={() => {
+            dispatch(removeTodo(index));
+          }}
+        />
+      ))}
+    </>
+  );
+};
+
+angularComponents.component("listItems", {
+  bindings: {},
+  controller: [
+    "$element",
+    function ($element) {
+      const ctrl = this;
+
+      ctrl.$scope = window.angular.element($element).scope();
+
+      ctrl.$onChanges = () => {
+        ReactDOM.render(
+          <Provider store={store}>
+            <ListItems />
+          </Provider>,
           $element[0]
         );
       };
