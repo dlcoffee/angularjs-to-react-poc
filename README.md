@@ -13,6 +13,5 @@ Starter AngularJS code.
 ## How to run
 
 - `npm install`
-- `npm start`
-- run `npx babel --watch src --out-dir dist --presets react-app/prod` to be able to write jsx in `src/`
-- visit `http://localhost:3000`
+- `npm run dev`
+- visit `http://localhost:8080`
