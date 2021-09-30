@@ -1,37 +1,36 @@
-const angularComponents = angular.module('angularComponents', [])
-const angularServices = angular.module('angularServices', [])
+import angular from "angular";
+import "@uirouter/angularjs";
 
-const angularApp = angular.module('angularApp', [
-  'ui.router',
-  'angularServices',
-  'angularComponents',
-])
+import "./components";
+import "./todo-storage";
+
+const angularApp = angular.module("angularApp", ["ui.router", "angularServices", "angularComponents"]);
 
 angularApp
   .config([
-    '$locationProvider',
-    '$stateProvider',
-    '$urlRouterProvider',
+    "$locationProvider",
+    "$stateProvider",
+    "$urlRouterProvider",
     function ($locationProvider, $stateProvider, $urlRouterProvider) {
       const home = {
-        name: 'home',
-        url: '/',
+        name: "home",
+        url: "/",
         views: {
-          heading: 'headingComponent',
-          'main-content': 'mainComponent',
+          heading: "headingComponent",
+          "main-content": "mainComponent",
         },
-      }
+      };
 
-      $stateProvider.state(home)
+      $stateProvider.state(home);
 
-      $urlRouterProvider.otherwise('/')
+      $urlRouterProvider.otherwise("/");
 
-      $locationProvider.html5Mode({ enabled: true, requireBase: false })
+      $locationProvider.html5Mode({ enabled: true, requireBase: false });
     },
   ])
   .run([
-    '$rootScope',
+    "$rootScope",
     function (rootScope) {
-      rootScope.$broadcast('appConfigured')
+      rootScope.$broadcast("appConfigured");
     },
-  ])
+  ]);

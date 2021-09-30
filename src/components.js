@@ -1,4 +1,10 @@
-angularComponents.component('headingComponent', {
+import angular from "angular";
+import React from "react";
+import ReactDOM from "react-dom";
+
+const angularComponents = angular.module("angularComponents", []);
+
+angularComponents.component("headingComponent", {
   template: `
     <nav style='border: 2px solid blue; padding: 2px;'>
       <div class="nav-wrapper">
@@ -8,17 +14,17 @@ angularComponents.component('headingComponent', {
     </nav
   `,
   controller: [
-    '$scope',
-    'todoStorage',
+    "$scope",
+    "todoStorage",
     function ($scope, todoStorage) {
       $scope.todoCount = () => {
-        return todoStorage.todos.filter((todo) => !todo.completed).length
-      }
+        return todoStorage.todos.filter((todo) => !todo.completed).length;
+      };
     },
   ],
-})
+});
 
-angularComponents.component('mainComponent', {
+angularComponents.component("mainComponent", {
   template: `
     <main style='margin: 16px auto;'>
       <form ng-submit="addTodo()" style='margin: 0 auto; max-width: 400px;'>
@@ -89,65 +95,65 @@ angularComponents.component('mainComponent', {
     </main>
   `,
   controller: [
-    '$scope',
-    'todoStorage',
+    "$scope",
+    "todoStorage",
     function ($scope, todoStorage) {
       this.$onInit = function () {
         // console.log($scope.todos)
-      }
+      };
 
-      $scope.todos = todoStorage.todos
-      $scope.newTodo = ''
+      $scope.todos = todoStorage.todos;
+      $scope.newTodo = "";
 
       $scope.addTodo = () => {
         const todo = {
           title: $scope.newTodo,
           completed: false,
-        }
+        };
 
-        todoStorage.todos = todoStorage.todos.concat([todo])
-        $scope.todos = todoStorage.todos
+        todoStorage.todos = todoStorage.todos.concat([todo]);
+        $scope.todos = todoStorage.todos;
 
-        $scope.newTodo = ''
-      }
+        $scope.newTodo = "";
+      };
 
       $scope.removeTodo = (todo, index) => {
-        todoStorage.todos = todoStorage.todos.filter((t, i) => i !== index)
-        $scope.todos = todoStorage.todos
-      }
+        todoStorage.todos = todoStorage.todos.filter((t, i) => i !== index);
+        $scope.todos = todoStorage.todos;
+      };
 
       $scope.handleEdit = (editedTodo, index) => {
         todoStorage.todos = todoStorage.todos.map((t, i) => {
           if (i === index) {
-            return editedTodo
+            return editedTodo;
           }
 
-          return t
-        })
-        $scope.todos = todoStorage.todos
-      }
+          return t;
+        });
+        $scope.todos = todoStorage.todos;
+      };
 
       $scope.handleCheck = (todo, index) => {
         todoStorage.todos = todoStorage.todos.map((t, i) => {
           if (i === index) {
-            return { ...t, completed: !t.completed }
+            return { ...t, completed: !t.completed };
           }
 
-          return t
-        })
-        $scope.todos = todoStorage.todos
-      }
+          return t;
+        });
+        $scope.todos = todoStorage.todos;
+      };
     },
   ],
-})
+});
 
-angularComponents.component('ngListItem', {
+angularComponents.component("ngListItem", {
   bindings: {
-    index: '<',
-    todo: '<',
-    onCheck: '&',
-    onEdit: '&',
-    onRemove: '<',
+    index: "<",
+    todo: "<",
+    onCheck: "&",
+    onEdit: "&",
+    onRemove: "<",
   },
   template: `
     <li>
@@ -166,111 +172,102 @@ angularComponents.component('ngListItem', {
   `,
   controller: [
     function () {
-      const ctrl = this
+      const ctrl = this;
 
-      ctrl.editingTodo = null
+      ctrl.editingTodo = null;
 
       ctrl.handleEditing = () => {
-        ctrl.editingTodo = angular.copy(ctrl.todo, {})
-      }
+        ctrl.editingTodo = angular.copy(ctrl.todo, {});
+      };
 
       ctrl.handleCheck = () => {
-        ctrl.onCheck({ index: ctrl.index, todo: ctrl.todo })
-      }
+        ctrl.onCheck({ index: ctrl.index, todo: ctrl.todo });
+      };
 
       ctrl.finishEditing = () => {
-        ctrl.onEdit({ index: ctrl.index, editedTodo: ctrl.editingTodo })
-        ctrl.editingTodo = null
-      }
+        ctrl.onEdit({ index: ctrl.index, editedTodo: ctrl.editingTodo });
+        ctrl.editingTodo = null;
+      };
     },
   ],
-})
+});
 
 class ListItem extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
 
     this.state = {
       editingTodo: null,
-    }
+    };
   }
 
   render() {
-    const { index, todo, onCheck, onRemove, onEdit } = this.props
-    const { editingTodo } = this.state
+    const { index, todo, onCheck, onRemove, onEdit } = this.props;
+    const { editingTodo } = this.state;
 
     const handleSubmit = (e) => {
-      e.preventDefault()
+      e.preventDefault();
 
-      onEdit(editingTodo, index)
-      this.setState({ editingTodo: null })
-    }
+      onEdit(editingTodo, index);
+      this.setState({ editingTodo: null });
+    };
 
     const setEdit = () => {
-      this.setState({ editingTodo: todo })
-    }
+      this.setState({ editingTodo: todo });
+    };
 
     const handleEditing = (e) => {
-      this.setState({ editingTodo: { ...editingTodo, title: e.target.value } })
-    }
+      this.setState({ editingTodo: { ...editingTodo, title: e.target.value } });
+    };
 
     return (
       <li>
         <div className="view">
-          <input
-            type="checkbox"
-            checked={Boolean(todo.completed)}
-            onChange={() => onCheck(todo, index)}
-          ></input>
+          <input type="checkbox" checked={Boolean(todo.completed)} onChange={() => onCheck(todo, index)}></input>
           <button disabled={Boolean(editingTodo)} onClick={setEdit}>
             Edit
           </button>
           <button onClick={() => onRemove(todo, index)}>&times;</button>
 
           {editingTodo ? (
-            <form style={{ display: 'inline' }} onSubmit={handleSubmit}>
-              <input
-                type="text"
-                value={editingTodo.title}
-                onChange={handleEditing}
-                onBlur={handleSubmit}
-              ></input>
+            <form style={{ display: "inline" }} onSubmit={handleSubmit}>
+              <input type="text" value={editingTodo.title} onChange={handleEditing} onBlur={handleSubmit}></input>
             </form>
           ) : (
             <label>{todo.title}</label>
           )}
         </div>
       </li>
-    )
+    );
   }
 }
 
-angularComponents.component('listItem', {
+angularComponents.component("listItem", {
   bindings: {
-    index: '<',
-    todo: '<',
-    onCheck: '<',
-    onEdit: '<',
-    onRemove: '<',
+    index: "<",
+    todo: "<",
+    onCheck: "<",
+    onEdit: "<",
+    onRemove: "<",
   },
   controller: [
-    '$element',
+    "$element",
     function ($element) {
-      const ctrl = this
+      const ctrl = this;
 
-      ctrl.$scope = window.angular.element($element).scope()
+      ctrl.$scope = window.angular.element($element).scope();
 
       // callbacks need to be wrapped in an $apply()
       // in order for the parent to update visually
       const wrap = function (fn) {
         return function () {
-          const fnArgs = arguments
+          const fnArgs = arguments;
 
           ctrl.$scope.$apply(function () {
-            return fn.apply(null, fnArgs)
-          })
-        }
-      }
+            return fn.apply(null, fnArgs);
+          });
+        };
+      };
 
       ctrl.$onChanges = () => {
         ReactDOM.render(
@@ -282,10 +279,12 @@ angularComponents.component('listItem', {
             onRemove: wrap(ctrl.onRemove),
           }),
           $element[0]
-        )
-      }
+        );
+      };
 
-      ctrl.$onDestroy = () => ReactDOM.unmountComponentAtNode($element[0])
+      ctrl.$onDestroy = () => ReactDOM.unmountComponentAtNode($element[0]);
     },
   ],
-})
+});
+
+export default angularComponents;
