@@ -7,9 +7,11 @@ Starter AngularJS code.
 - express - serve the web app
 - angular - angularjs framework
 - @uirouter/angularjs - router to manage particular angularjs views
+- babel-cli - babel cli tool
+- babel-preset-react-app - enable jsx
 
 ## How to run
 
 - `npm install`
-- `npm start`
-- visit `http://localhost:3000`
+- `npm run dev`
+- visit `http://localhost:8080`
