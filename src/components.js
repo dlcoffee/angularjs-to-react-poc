@@ -1,4 +1,14 @@
-angularComponents.component('headingComponent', {
+import angular from "angular";
+import React from "react";
+import ReactDOM from "react-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+import { addTodo, removeTodo, toggleTodo } from "./redux/slices/todoSlice";
+
+const angularComponents = angular.module("angularComponents", []);
+
+angularComponents.component("headingComponent", {
   template: `
     <nav style='border: 2px solid blue; padding: 2px;'>
       <div class="nav-wrapper">
@@ -8,36 +18,32 @@ angularComponents.component('headingComponent', {
     </nav
   `,
   controller: [
-    '$scope',
-    'todoStorage',
+    "$scope",
+    "todoStorage",
     function ($scope, todoStorage) {
       $scope.todoCount = () => {
-        return todoStorage.todos.filter((todo) => !todo.completed).length
-      }
+        return todoStorage.todos.filter((todo) => !todo.completed).length;
+      };
     },
   ],
-})
+});
 
-angularComponents.component('mainComponent', {
+angularComponents.component("mainComponent", {
   template: `
     <main style='margin: 16px auto;'>
+      <form ng-submit="addReduxTodo()" style='margin: 0 auto; max-width: 400px;'>
+        <input placeholder="Add Redux Todo" ng-model="newReduxTodo" autofocus style='width: 100%;'>
+      </form>
+
       <form ng-submit="addTodo()" style='margin: 0 auto; max-width: 400px;'>
         <input placeholder="Add Todo" ng-model="newTodo" autofocus style='width: 100%;'>
       </form>
 
-
       <div style='display: flex; justify-content: center;'>
         <div>
           <ul class="todo-list">
-            <h4>(1) react</h4>
-            <list-item
-              ng-repeat="todo in todos"
-              index="$index"
-              todo="todo"
-              on-remove="removeTodo"
-              on-edit="handleEdit"
-              on-check="handleCheck">
-            </list-item>
+            <h4>(1) react with redux</h4>
+            <list-items />
           </ul>
         </div>
 
@@ -57,14 +63,14 @@ angularComponents.component('mainComponent', {
 
         <div>
           <ul class="todo-list">
-            <h4>(1) angular</h4>
+            <h4>(1) angular redux</h4>
             <ng-list-item
-              ng-repeat="todo in todos"
+              ng-repeat="todo in reduxTodo.todos"
               index="$index"
               todo="todo"
               on-remove="removeTodo"
               on-edit="handleEdit(editedTodo, index)"
-              on-check="handleCheck(todo, index)">
+              on-check="reduxTodo.toggleTodo(index)">
             </ng-list-item>
           </ul>
         </div>
@@ -84,70 +90,89 @@ angularComponents.component('mainComponent', {
         </div>
       </div>
 
+      <p>Redux State</p>
+      <pre>{{ reduxTodo.todos | json }}</pre>
+
+      <p>Angular State</p>
       <pre>{{ todos | json }}</pre>
+
 
     </main>
   `,
+  controllerAs: "reduxTodo",
   controller: [
-    '$scope',
-    'todoStorage',
-    function ($scope, todoStorage) {
+    "$scope",
+    "todoStorage",
+    "$ngRedux",
+    function ($scope, todoStorage, $ngRedux) {
       this.$onInit = function () {
         // console.log($scope.todos)
-      }
+        const unsubscribe = $ngRedux.connect((state) => ({ todos: state.todo.todos }), {
+          addTodo,
+          removeTodo,
+          toggleTodo,
+        })(this);
+        $scope.$on("$destroy", unsubscribe);
+      };
 
-      $scope.todos = todoStorage.todos
-      $scope.newTodo = ''
+      $scope.todos = todoStorage.todos;
+
+      $scope.newTodo = "";
 
       $scope.addTodo = () => {
         const todo = {
           title: $scope.newTodo,
           completed: false,
-        }
+        };
 
-        todoStorage.todos = todoStorage.todos.concat([todo])
-        $scope.todos = todoStorage.todos
+        todoStorage.todos = todoStorage.todos.concat([todo]);
+        $scope.todos = todoStorage.todos;
 
-        $scope.newTodo = ''
-      }
+        $scope.newTodo = "";
+      };
+
+      $scope.addReduxTodo = () => {
+        $ngRedux.dispatch(addTodo($scope.newReduxTodo));
+        $scope.newReduxTodo = "";
+      };
 
       $scope.removeTodo = (todo, index) => {
-        todoStorage.todos = todoStorage.todos.filter((t, i) => i !== index)
-        $scope.todos = todoStorage.todos
-      }
+        todoStorage.todos = todoStorage.todos.filter((t, i) => i !== index);
+        $scope.todos = todoStorage.todos;
+      };
 
       $scope.handleEdit = (editedTodo, index) => {
         todoStorage.todos = todoStorage.todos.map((t, i) => {
           if (i === index) {
-            return editedTodo
+            return editedTodo;
           }
 
-          return t
-        })
-        $scope.todos = todoStorage.todos
-      }
+          return t;
+        });
+        $scope.todos = todoStorage.todos;
+      };
 
       $scope.handleCheck = (todo, index) => {
         todoStorage.todos = todoStorage.todos.map((t, i) => {
           if (i === index) {
-            return { ...t, completed: !t.completed }
+            return { ...t, completed: !t.completed };
           }
 
-          return t
-        })
-        $scope.todos = todoStorage.todos
-      }
+          return t;
+        });
+        $scope.todos = todoStorage.todos;
+      };
     },
   ],
-})
+});
 
-angularComponents.component('ngListItem', {
+angularComponents.component("ngListItem", {
   bindings: {
-    index: '<',
-    todo: '<',
-    onCheck: '&',
-    onEdit: '&',
-    onRemove: '<',
+    index: "<",
+    todo: "<",
+    onCheck: "&",
+    onEdit: "&",
+    onRemove: "<",
   },
   template: `
     <li>
@@ -166,126 +191,167 @@ angularComponents.component('ngListItem', {
   `,
   controller: [
     function () {
-      const ctrl = this
+      const ctrl = this;
 
-      ctrl.editingTodo = null
+      ctrl.editingTodo = null;
 
       ctrl.handleEditing = () => {
-        ctrl.editingTodo = angular.copy(ctrl.todo, {})
-      }
+        ctrl.editingTodo = angular.copy(ctrl.todo, {});
+      };
 
       ctrl.handleCheck = () => {
-        ctrl.onCheck({ index: ctrl.index, todo: ctrl.todo })
-      }
+        ctrl.onCheck({ index: ctrl.index, todo: ctrl.todo });
+      };
 
       ctrl.finishEditing = () => {
-        ctrl.onEdit({ index: ctrl.index, editedTodo: ctrl.editingTodo })
-        ctrl.editingTodo = null
-      }
+        ctrl.onEdit({ index: ctrl.index, editedTodo: ctrl.editingTodo });
+        ctrl.editingTodo = null;
+      };
     },
   ],
-})
+});
 
 class ListItem extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
 
     this.state = {
       editingTodo: null,
-    }
+    };
   }
 
   render() {
-    const { index, todo, onCheck, onRemove, onEdit } = this.props
-    const { editingTodo } = this.state
+    const { index, todo, onCheck, onRemove, onEdit } = this.props;
+    const { editingTodo } = this.state;
 
     const handleSubmit = (e) => {
-      e.preventDefault()
+      e.preventDefault();
 
-      onEdit(editingTodo, index)
-      this.setState({ editingTodo: null })
-    }
+      onEdit(editingTodo, index);
+      this.setState({ editingTodo: null });
+    };
 
     const setEdit = () => {
-      this.setState({ editingTodo: todo })
-    }
+      this.setState({ editingTodo: todo });
+    };
 
     const handleEditing = (e) => {
-      this.setState({ editingTodo: { ...editingTodo, title: e.target.value } })
-    }
+      this.setState({ editingTodo: { ...editingTodo, title: e.target.value } });
+    };
 
     return (
       <li>
         <div className="view">
-          <input
-            type="checkbox"
-            checked={Boolean(todo.completed)}
-            onChange={() => onCheck(todo, index)}
-          ></input>
+          <input type="checkbox" checked={Boolean(todo.completed)} onChange={() => onCheck(todo, index)}></input>
           <button disabled={Boolean(editingTodo)} onClick={setEdit}>
             Edit
           </button>
           <button onClick={() => onRemove(todo, index)}>&times;</button>
 
           {editingTodo ? (
-            <form style={{ display: 'inline' }} onSubmit={handleSubmit}>
-              <input
-                type="text"
-                value={editingTodo.title}
-                onChange={handleEditing}
-                onBlur={handleSubmit}
-              ></input>
+            <form style={{ display: "inline" }} onSubmit={handleSubmit}>
+              <input type="text" value={editingTodo.title} onChange={handleEditing} onBlur={handleSubmit}></input>
             </form>
           ) : (
             <label>{todo.title}</label>
           )}
         </div>
       </li>
-    )
+    );
   }
 }
 
-angularComponents.component('listItem', {
+angularComponents.component("listItem", {
   bindings: {
-    index: '<',
-    todo: '<',
-    onCheck: '<',
-    onEdit: '<',
-    onRemove: '<',
+    index: "<",
+    todo: "<",
+    onCheck: "<",
+    onEdit: "<",
+    onRemove: "<",
   },
   controller: [
-    '$element',
+    "$element",
     function ($element) {
-      const ctrl = this
+      const ctrl = this;
 
-      ctrl.$scope = window.angular.element($element).scope()
+      ctrl.$scope = window.angular.element($element).scope();
 
       // callbacks need to be wrapped in an $apply()
       // in order for the parent to update visually
       const wrap = function (fn) {
         return function () {
-          const fnArgs = arguments
+          const fnArgs = arguments;
 
           ctrl.$scope.$apply(function () {
-            return fn.apply(null, fnArgs)
-          })
-        }
-      }
+            return fn.apply(null, fnArgs);
+          });
+        };
+      };
 
       ctrl.$onChanges = () => {
         ReactDOM.render(
-          React.createElement(ListItem, {
-            index: ctrl.index,
-            todo: ctrl.todo,
-            onCheck: wrap(ctrl.onCheck),
-            onEdit: wrap(ctrl.onEdit),
-            onRemove: wrap(ctrl.onRemove),
-          }),
+          <Provider store={store}>
+            <ListItem
+              index={ctrl.index}
+              todo={ctrl.todo}
+              onCheck={wrap(ctrl.onCheck)}
+              onEdit={wrap(ctrl.onEdit)}
+              onRemove={wrap(ctrl.onRemove)}
+            />
+          </Provider>,
           $element[0]
-        )
-      }
+        );
+      };
 
-      ctrl.$onDestroy = () => ReactDOM.unmountComponentAtNode($element[0])
+      ctrl.$onDestroy = () => ReactDOM.unmountComponentAtNode($element[0]);
     },
   ],
-})
+});
+
+const ListItems = () => {
+  const todos = useSelector((state) => state.todo.todos);
+  const dispatch = useDispatch();
+
+  return (
+    <>
+      {todos.map((todo, index) => (
+        <ListItem
+          key={index}
+          index={index}
+          todo={todo}
+          onCheck={() => {
+            dispatch(toggleTodo(index));
+          }}
+          onRemove={() => {
+            dispatch(removeTodo(index));
+          }}
+        />
+      ))}
+    </>
+  );
+};
+
+angularComponents.component("listItems", {
+  bindings: {},
+  controller: [
+    "$element",
+    function ($element) {
+      const ctrl = this;
+
+      ctrl.$scope = window.angular.element($element).scope();
+
+      ctrl.$onChanges = () => {
+        ReactDOM.render(
+          <Provider store={store}>
+            <ListItems />
+          </Provider>,
+          $element[0]
+        );
+      };
+
+      ctrl.$onDestroy = () => ReactDOM.unmountComponentAtNode($element[0]);
+    },
+  ],
+});
+
+export default angularComponents;
